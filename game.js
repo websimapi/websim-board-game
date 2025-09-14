@@ -228,6 +228,40 @@ class BoardGame {
         }
     }
 
+    processDiceRoll(playerId, diceValue) {
+        if (!this.isHost) return;
+
+        const playersArray = Array.from(this.players.values());
+        const playerIds = Array.from(this.players.keys());
+        const currentPlayerId = playerIds[this.currentPlayerIndex];
+        
+        if (playerId !== currentPlayerId) {
+            console.log(`Player with ID ${playerId} tried to roll out of turn.`);
+            const player = this.players.get(playerId);
+            if(player && player.connection) {
+                player.connection.send({type: 'error', message: "Not your turn."});
+            }
+            return;
+        }
+        
+        const currentPlayer = playersArray[this.currentPlayerIndex];
+        
+        // Broadcast dice result to all players including host to show animation.
+        // We can do this on host side as well.
+        this.updateDiceDisplay(diceValue);
+        this.players.forEach((p) => {
+            if (p.connection) {
+                p.connection.send({
+                    type: 'dice-result',
+                    value: diceValue
+                });
+            }
+        });
+        
+        this.addToGameLog(`${currentPlayer.name} rolled a ${diceValue}`);
+        this.movePlayer(currentPlayer, diceValue);
+    }
+
     handleHostMessage(data) {
         switch (data.type) {
             case 'game-state':
