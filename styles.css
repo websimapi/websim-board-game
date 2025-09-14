@@ -239,6 +239,11 @@ h2 {
     cursor: not-allowed;
 }
 
+#host-panel-toggle {
+    display: none; /* Hidden by default */
+    padding: 10px 15px;
+}
+
 .game-main {
     flex: 1;
     display: flex;
@@ -251,6 +256,7 @@ h2 {
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden; /* Prevent SVG overflow issues */
 }
 
 #game-sidebar {
@@ -345,6 +351,39 @@ h2 {
     background: #e3f2fd;
 }
 
+/* Host View Specific Styles */
+body.host-view #host-panel-toggle {
+    display: block;
+}
+
+body.host-view .game-main {
+    position: relative;
+    overflow: hidden;
+}
+
+body.host-view #board-container {
+    flex: 1; /* Take up all space */
+}
+
+body.host-view #game-sidebar {
+    position: absolute;
+    top: 0;
+    right: -100%; /* Start off-screen */
+    width: 320px;
+    max-width: 90vw;
+    height: 100%;
+    background-color: white;
+    box-shadow: -4px 0 15px rgba(0,0,0,0.15);
+    transition: right 0.3s ease-in-out;
+    padding: 20px;
+    z-index: 10;
+    overflow-y: auto;
+}
+
+body.host-view #game-sidebar.open {
+    right: 0; /* Slide in */
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .menu-container, .setup-container {
@@ -355,8 +394,15 @@ h2 {
     h1 {
         font-size: 2rem;
     }
-    
+
     #game-header {
+        flex-direction: row; /* Keep it horizontal on mobile for host */
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    body:not(.host-view) #game-header {
         flex-direction: column;
         text-align: center;
     }
@@ -366,7 +412,7 @@ h2 {
     }
     
     #board-container {
-        padding: 10px;
+        padding: 0; /* Remove padding to maximize board */
     }
     
     #game-controls {
@@ -382,9 +428,30 @@ h2 {
         min-width: auto;
         order: -1;
     }
+
+    /* Host view adjustments for mobile */
+    body.host-view .game-main {
+        padding: 5px; /* Reduce padding for more board space */
+        flex-direction: row;
+    }
+
+    body.host-view #game-sidebar {
+        order: 0;
+    }
     
     #game-log {
         max-height: 150px;
+    }
+}
+
+/* Landscape Mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    body.host-view #app, body.host-view #game-board, body.host-view .game-container {
+        height: 100vh;
+        max-height: 100vh;
+    }
+    body.host-view .game-main {
+        padding: 5px;
     }
 }
 

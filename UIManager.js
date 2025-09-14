@@ -18,6 +18,7 @@ class UIManager {
             rollDiceBtn: document.getElementById('roll-dice-btn'),
             joinGameBtn: document.getElementById('join-game-btn'),
             sendChatBtn: document.getElementById('send-chat-btn'),
+            hostPanelToggle: document.getElementById('host-panel-toggle'),
 
             qrCanvas: document.getElementById('qr-code'),
             joinUrl: document.getElementById('join-url'),
@@ -30,6 +31,7 @@ class UIManager {
             diceDisplay: document.getElementById('dice-display'),
             gamePlayersList: document.getElementById('game-players-list'),
             gameLog: document.getElementById('game-log'),
+            gameSidebar: document.getElementById('game-sidebar'),
         };
         
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -47,6 +49,7 @@ class UIManager {
         this.elements.chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.handleSendChat();
         });
+        this.elements.hostPanelToggle.addEventListener('click', () => this.toggleHostPanel());
     }
 
     checkForJoinUrl(callback) {
@@ -70,12 +73,21 @@ class UIManager {
 
     showMainMenu() {
         this.showScreen('main-menu');
+        document.body.classList.remove('host-view'); // Clean up class on exit
         window.history.pushState({}, document.title, window.location.pathname);
     }
     
     showJoinScreen() {
         this.showScreen('player-setup');
         this.updateConnectionStatus('connecting', 'Enter game ID or scan QR code');
+    }
+
+    enableHostView() {
+        document.body.classList.add('host-view');
+    }
+
+    toggleHostPanel() {
+        this.elements.gameSidebar.classList.toggle('open');
     }
 
     async displayQRCode(peerId) {

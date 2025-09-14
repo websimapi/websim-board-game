@@ -60,6 +60,9 @@ class GameManager {
 
     showGameBoard() {
         this.uiManager.showScreen('game-board');
+        if(this.gameState.isHost) {
+            this.uiManager.enableHostView();
+        }
         this.boardRenderer.renderBoard(this.gameState.board);
         this.updateGameUI();
     }
