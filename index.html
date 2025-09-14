@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Board Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="importmap">
+    {
+        "imports": {
+            "peerjs": "https://esm.sh/peerjs@1.5.2",
+            "qrcode": "https://esm.sh/qrcode@1.5.3"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="app">
+        <!-- Main Menu -->
+        <div id="main-menu" class="screen active">
+            <div class="menu-container">
+                <h1>Board Game</h1>
+                <div class="menu-buttons">
+                    <button id="host-btn" class="menu-btn primary">Host Game</button>
+                    <button id="join-btn" class="menu-btn">Join Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Host Setup Screen -->
+        <div id="host-setup" class="screen">
+            <div class="setup-container">
+                <h2>Hosting Game</h2>
+                <div id="qr-container">
+                    <canvas id="qr-code"></canvas>
+                    <p>Scan QR code to join</p>
+                    <div id="join-url"></div>
+                </div>
+                <div id="players-list">
+                    <h3>Connected Players</h3>
+                    <div id="players"></div>
+                </div>
+                <button id="start-game-btn" class="menu-btn primary" disabled>Start Game</button>
+                <button id="back-to-menu" class="menu-btn secondary">Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Player Setup Screen -->
+        <div id="player-setup" class="screen">
+            <div class="setup-container">
+                <h2>Join Game</h2>
+                <input type="text" id="player-name" placeholder="Enter your name" maxlength="12">
+                <div id="connection-status">Connecting...</div>
+                <button id="back-to-menu-player" class="menu-btn secondary">Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Game Board Screen -->
+        <div id="game-board" class="screen">
+            <div class="game-container">
+                <div id="game-header">
+                    <div id="current-player">Current Player: <span id="current-player-name"></span></div>
+                    <div id="dice-container">
+                        <div id="dice-display">🎲</div>
+                        <button id="roll-dice-btn" class="dice-btn">Roll Dice</button>
+                    </div>
+                </div>
+                
+                <div id="board-container">
+                    <svg id="game-board-svg" viewBox="0 0 800 800">
+                        <!-- Board will be generated here -->
+                    </svg>
+                </div>
+
+                <div id="game-controls">
+                    <div id="player-info">
+                        <h3>Players</h3>
+                        <div id="game-players-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="game.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
+
