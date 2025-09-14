@@ -272,7 +272,7 @@ class BoardGame {
         });
 
         const startBtn = document.getElementById('start-game-btn');
-        startBtn.disabled = this.players.size < 2;
+        startBtn.disabled = this.players.size < 1;
     }
 
     broadcastGameState() {
