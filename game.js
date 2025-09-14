@@ -158,6 +158,13 @@ class BoardGame {
             document.getElementById('connection-status').className = 'status-connected';
             document.getElementById('connection-status').textContent = 'Connected! Enter your name:';
             
+            // Add join button functionality
+            const joinBtn = document.getElementById('join-game-btn');
+            joinBtn.style.display = 'block';
+            joinBtn.addEventListener('click', () => {
+                this.sendPlayerInfo(conn);
+            });
+            
             document.getElementById('player-name').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     this.sendPlayerInfo(conn);
@@ -183,6 +190,8 @@ class BoardGame {
                 name: name,
                 color: this.getRandomColor()
             });
+            document.getElementById('connection-status').textContent = 'Joining game...';
+            document.getElementById('join-game-btn').disabled = true;
         }
     }
 
@@ -195,14 +204,26 @@ class BoardGame {
                     connection: conn,
                     position: 0
                 });
+                
+                // Send confirmation back to player
+                conn.send({
+                    type: 'join-confirmed',
+                    playerId: conn.peer
+                });
+                
                 this.updatePlayersDisplay();
                 this.broadcastGameState();
+                this.addToGameLog(`${data.name} joined the game`);
                 break;
                 
             case 'dice-roll':
                 if (this.gameState.gameStarted) {
-                    this.processDiceRoll(data.playerId, data.value);
+                    this.processDiceRoll(conn.peer, data.value);
                 }
+                break;
+                
+            case 'chat-message':
+                this.broadcastChatMessage(data.message, data.playerName);
                 break;
         }
     }
@@ -214,10 +235,24 @@ class BoardGame {
                 if (data.gameState.gameStarted) {
                     this.showGameBoard();
                 }
+                this.updateGameDisplay();
+                break;
+                
+            case 'join-confirmed':
+                document.getElementById('connection-status').className = 'status-connected';
+                document.getElementById('connection-status').textContent = 'Successfully joined! Waiting for game to start...';
                 break;
                 
             case 'dice-result':
                 this.updateDiceDisplay(data.value);
+                break;
+                
+            case 'game-log':
+                this.addToGameLog(data.message);
+                break;
+                
+            case 'chat-message':
+                this.displayChatMessage(data.message, data.playerName);
                 break;
         }
     }
@@ -274,28 +309,49 @@ class BoardGame {
     }
 
     createBoard() {
-        // Create a simple square board with spaces around the perimeter
+        // Create a board with special spaces
         const spaces = [];
-        const boardSize = 12; // 12 spaces per side
+        const boardSize = 12;
+        const specialSpaces = [5, 11, 17, 23, 29, 35, 41]; // Special space indices
         
         // Bottom row (left to right)
         for (let i = 0; i < boardSize; i++) {
-            spaces.push({ x: i * 60 + 50, y: 700, id: spaces.length });
+            spaces.push({ 
+                x: i * 60 + 50, 
+                y: 700, 
+                id: spaces.length,
+                type: specialSpaces.includes(spaces.length) ? 'special' : 'normal'
+            });
         }
         
         // Right column (bottom to top)
         for (let i = 1; i < boardSize; i++) {
-            spaces.push({ x: 710, y: 700 - i * 60, id: spaces.length });
+            spaces.push({ 
+                x: 710, 
+                y: 700 - i * 60, 
+                id: spaces.length,
+                type: specialSpaces.includes(spaces.length) ? 'special' : 'normal'
+            });
         }
         
         // Top row (right to left)
         for (let i = 1; i < boardSize; i++) {
-            spaces.push({ x: 710 - i * 60, y: 100, id: spaces.length });
+            spaces.push({ 
+                x: 710 - i * 60, 
+                y: 100, 
+                id: spaces.length,
+                type: specialSpaces.includes(spaces.length) ? 'special' : 'normal'
+            });
         }
         
         // Left column (top to bottom)
         for (let i = 1; i < boardSize - 1; i++) {
-            spaces.push({ x: 50, y: 100 + i * 60, id: spaces.length });
+            spaces.push({ 
+                x: 50, 
+                y: 100 + i * 60, 
+                id: spaces.length,
+                type: specialSpaces.includes(spaces.length) ? 'special' : 'normal'
+            });
         }
         
         return spaces;
@@ -311,7 +367,7 @@ class BoardGame {
             circle.setAttribute('cx', space.x);
             circle.setAttribute('cy', space.y);
             circle.setAttribute('r', 20);
-            circle.setAttribute('fill', '#ecf0f1');
+            circle.setAttribute('fill', space.type === 'special' ? '#f39c12' : '#ecf0f1');
             circle.setAttribute('stroke', '#2c3e50');
             circle.setAttribute('stroke-width', 2);
             svg.appendChild(circle);
@@ -367,33 +423,121 @@ class BoardGame {
     rollDice() {
         const value = Math.floor(Math.random() * 6) + 1;
         this.updateDiceDisplay(value);
+        this.playDiceSound();
         
         if (this.isHost) {
             const currentPlayer = Array.from(this.players.values())[this.currentPlayerIndex];
             if (currentPlayer) {
                 this.movePlayer(currentPlayer, value);
+                this.addToGameLog(`${currentPlayer.name} rolled a ${value}`);
             }
         } else {
             // Send dice roll to host
-            this.peer.connections[Object.keys(this.peer.connections)[0]][0].send({
-                type: 'dice-roll',
-                playerId: this.peer.id,
-                value: value
+            const connections = this.peer.connections;
+            const hostConnection = Object.values(connections)[0][0];
+            if (hostConnection) {
+                hostConnection.send({
+                    type: 'dice-roll',
+                    playerId: this.peer.id,
+                    value: value
+                });
+            }
+        }
+    }
+
+    playDiceSound() {
+        // Simple dice sound effect using Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+    }
+
+    movePlayer(player, spaces) {
+        const oldPosition = player.position;
+        player.position = (player.position + spaces) % this.gameState.board.length;
+        
+        // Check for special space effects
+        const currentSpace = this.gameState.board[player.position];
+        if (currentSpace.type === 'special') {
+            this.handleSpecialSpace(player);
+        }
+        
+        this.renderPlayerPieces();
+        this.nextTurn();
+        this.broadcastGameState();
+        
+        this.addToGameLog(`${player.name} moved from space ${oldPosition} to space ${player.position}`);
+    }
+
+    handleSpecialSpace(player) {
+        const effects = [
+            { text: 'Move forward 3 spaces!', action: () => { player.position = (player.position + 3) % this.gameState.board.length; }},
+            { text: 'Move back 2 spaces!', action: () => { player.position = Math.max(0, player.position - 2); }},
+            { text: 'Skip next turn!', action: () => { /* Could implement turn skipping */ }},
+            { text: 'Roll again!', action: () => { this.currentPlayerIndex = (this.currentPlayerIndex - 1 + this.players.size) % this.players.size; }}
+        ];
+        
+        const effect = effects[Math.floor(Math.random() * effects.length)];
+        effect.action();
+        this.addToGameLog(`${player.name} landed on a special space: ${effect.text}`);
+    }
+
+    addToGameLog(message) {
+        const gameLog = document.getElementById('game-log');
+        if (gameLog) {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            gameLog.appendChild(logEntry);
+            gameLog.scrollTop = gameLog.scrollHeight;
+        }
+        
+        // Broadcast to all players if host
+        if (this.isHost) {
+            this.players.forEach((player) => {
+                player.connection.send({
+                    type: 'game-log',
+                    message: message
+                });
             });
         }
     }
 
-    updateDiceDisplay(value) {
-        const diceDisplay = document.getElementById('dice-display');
-        const diceEmojis = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-        diceDisplay.textContent = diceEmojis[value];
+    broadcastChatMessage(message, playerName) {
+        this.displayChatMessage(message, playerName);
+        
+        if (this.isHost) {
+            this.players.forEach((player) => {
+                player.connection.send({
+                    type: 'chat-message',
+                    message: message,
+                    playerName: playerName
+                });
+            });
+        }
     }
 
-    movePlayer(player, spaces) {
-        player.position = (player.position + spaces) % this.gameState.board.length;
-        this.renderPlayerPieces();
-        this.nextTurn();
-        this.broadcastGameState();
+    displayChatMessage(message, playerName) {
+        const gameLog = document.getElementById('game-log');
+        if (gameLog) {
+            const chatEntry = document.createElement('div');
+            chatEntry.className = 'chat-entry';
+            chatEntry.innerHTML = `<strong>${playerName}:</strong> ${message}`;
+            gameLog.appendChild(chatEntry);
+            gameLog.scrollTop = gameLog.scrollHeight;
+        }
     }
 
     nextTurn() {
@@ -448,4 +592,3 @@ class BoardGame {
 
 // Initialize the game
 window.boardGame = new BoardGame();
-

@@ -50,6 +50,7 @@
             <div class="setup-container">
                 <h2>Join Game</h2>
                 <input type="text" id="player-name" placeholder="Enter your name" maxlength="12">
+                <button id="join-game-btn" class="menu-btn primary" style="display: none;">Join Game</button>
                 <div id="connection-status">Connecting...</div>
                 <button id="back-to-menu-player" class="menu-btn secondary">Back to Menu</button>
             </div>
@@ -66,16 +67,29 @@
                     </div>
                 </div>
                 
-                <div id="board-container">
-                    <svg id="game-board-svg" viewBox="0 0 800 800">
-                        <!-- Board will be generated here -->
-                    </svg>
-                </div>
-
-                <div id="game-controls">
-                    <div id="player-info">
-                        <h3>Players</h3>
-                        <div id="game-players-list"></div>
+                <div class="game-main">
+                    <div id="board-container">
+                        <svg id="game-board-svg" viewBox="0 0 800 800">
+                            <!-- Board will be generated here -->
+                        </svg>
+                    </div>
+                    
+                    <div id="game-sidebar">
+                        <div id="game-controls">
+                            <div id="player-info">
+                                <h3>Players</h3>
+                                <div id="game-players-list"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="game-log-container">
+                            <h3>Game Log</h3>
+                            <div id="game-log"></div>
+                            <div id="chat-input-container">
+                                <input type="text" id="chat-input" placeholder="Type a message..." maxlength="100">
+                                <button id="send-chat-btn">Send</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -86,4 +100,3 @@
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
-
