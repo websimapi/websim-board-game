@@ -9,8 +9,8 @@ class BoardRenderer {
         boardData.forEach((space, index) => {
             const group = this.createSvgElement('g');
             
-            const circle = this.createSvgElement('circle', {
-                cx: space.x, cy: space.y, r: 20,
+            const square = this.createSvgElement('rect', {
+                x: space.x - 25, y: space.y - 25, width: 50, height: 50, rx: 5, ry: 5,
                 fill: space.type === 'special' ? '#f39c12' : '#ecf0f1',
                 stroke: '#2c3e50', 'stroke-width': 2
             });
@@ -22,7 +22,7 @@ class BoardRenderer {
             });
             text.textContent = index;
             
-            group.appendChild(circle);
+            group.appendChild(square);
             group.appendChild(text);
             this.svg.appendChild(group);
         });
@@ -37,8 +37,8 @@ class BoardRenderer {
             if (!space) return;
 
             const piece = this.createSvgElement('circle', {
-                cx: space.x, cy: space.y - 30, r: 8,
-                fill: player.color, stroke: '#ffffff', 'stroke-width': 2
+                cx: space.x, cy: space.y - 40, r: 10,
+                fill: player.color, stroke: '#ffffff', 'stroke-width': 3
             });
             piece.classList.add('player-piece');
             this.svg.appendChild(piece);

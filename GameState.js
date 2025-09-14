@@ -68,17 +68,21 @@ class GameState {
 
     createBoard() {
         const spaces = [];
-        const boardSize = 12;
-        const specialSpaces = [5, 11, 17, 23, 29, 35, 41];
-        
+        const boardSize = 8; // Smaller board for larger spaces
+        const spaceSize = 80; // Larger spaces
+        const margin = 100;
+        const width = 800;
+        const height = 800;
+        const specialSpaces = [3, 7, 11, 15, 19, 23];
+
         // Bottom row
-        for (let i = 0; i < boardSize; i++) spaces.push({ x: i * 60 + 50, y: 700, type: specialSpaces.includes(spaces.length) ? 'special' : 'normal' });
+        for (let i = 0; i < boardSize; i++) spaces.push({ x: i * spaceSize + margin, y: height - margin, type: specialSpaces.includes(spaces.length) ? 'special' : 'normal' });
         // Right col
-        for (let i = 1; i < boardSize; i++) spaces.push({ x: 710, y: 700 - i * 60, type: specialSpaces.includes(spaces.length) ? 'special' : 'normal' });
+        for (let i = 1; i < boardSize; i++) spaces.push({ x: (boardSize - 1) * spaceSize + margin, y: height - margin - i * spaceSize, type: specialSpaces.includes(spaces.length) ? 'special' : 'normal' });
         // Top row
-        for (let i = 1; i < boardSize; i++) spaces.push({ x: 710 - i * 60, y: 100, type: specialSpaces.includes(spaces.length) ? 'special' : 'normal' });
+        for (let i = 1; i < boardSize; i++) spaces.push({ x: (boardSize - 1) * spaceSize + margin - i * spaceSize, y: margin, type: specialSpaces.includes(spaces.length) ? 'special' : 'normal' });
         // Left col
-        for (let i = 1; i < boardSize - 1; i++) spaces.push({ x: 50, y: 100 + i * 60, type: specialSpaces.includes(spaces.length) ? 'special' : 'normal' });
+        for (let i = 1; i < boardSize - 1; i++) spaces.push({ x: margin, y: margin + i * spaceSize, type: specialSpaces.includes(spaces.length) ? 'special' : 'normal' });
         
         return spaces;
     }
