@@ -420,6 +420,19 @@ class BoardGame {
         svg.appendChild(piece);
     }
 
+    updateDiceDisplay(value) {
+        const diceDisplay = document.getElementById('dice-display');
+        if (diceDisplay) {
+            diceDisplay.textContent = value;
+            
+            // Add animation effect
+            diceDisplay.style.transform = 'scale(1.3)';
+            setTimeout(() => {
+                diceDisplay.style.transform = 'scale(1)';
+            }, 200);
+        }
+    }
+
     rollDice() {
         const value = Math.floor(Math.random() * 6) + 1;
         this.updateDiceDisplay(value);
