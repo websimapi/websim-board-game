@@ -79,7 +79,7 @@ class UIManager {
     }
 
     async displayQRCode(peerId) {
-        const joinUrl = `${window.location.origin}${window.location.pathname}?peerjsid=${peerId}`;
+        const joinUrl = `https://boardgames.on.websim.com/?peerjsid=${peerId}`;
         this.elements.joinUrl.textContent = joinUrl;
         try {
             await QRCode.toCanvas(this.elements.qrCanvas, joinUrl, {
